@@ -98,6 +98,7 @@ class EONET {
     
     fileprivate static func events(forLast days: Int, closed: Bool) ->
         Observable<[EOEvent]> {
+            
             return request(endpoint: eventsEndpoint, query: [
                 "days": NSNumber(value: days),
                 "status": (closed ? "closed" : "open")
@@ -108,6 +109,17 @@ class EONET {
                     }
                     return raw.flatMap(EOEvent.init)
             }
+    }
+    
+    static func events(forLast days: Int = 360 ) -> Observable<[EOEvent]>{
+        let openEvents = events(forLast: days, closed:false)
+        let closeEvents = events(forLast: days, closed:true)
+        
+        return openEvents.concat(closeEvents)
+        
+       /* return Observable.of(openEvents, closeEvents)
+            .merge()
+            .reduce([]) { running, new in running + new }*/
     }
     
   
